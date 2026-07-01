@@ -1,0 +1,107 @@
+/* ═══════════════════════════════════════
+   VARIABLES GLOBALES
+═══════════════════════════════════════ */
+:root {
+  --jh-indigo:    #6366F1;
+  --jh-indigo-d:  #4F46E5;
+  --jh-indigo-l:  #EEF2FF;
+  --jh-navy:      #0F172A;
+  --jh-bg:        #F8FAFC;
+  --jh-text:      #1E293B;
+  --jh-muted:     #64748B;
+  --jh-border:    #E2E8F0;
+  --jh-hero-bg:   #DBEAFE;
+  --jh-hero-border: #BFDBFE;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--jh-bg);
+  color: var(--jh-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════ */
+.jh-navbar {
+  background: var(--jh-navy) !important;
+  height: 60px;
+}
+
+.jh-brand {
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: -.5px;
+  color: #fff !important;
+  text-decoration: none;
+}
+.jh-brand span { color: var(--jh-indigo); }
+
+.jh-nav-link {
+  color: rgba(255, 255, 255, .65);
+  font-size: .85rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: .35rem .75rem;
+  border-radius: 6px;
+  transition: all .15s;
+  white-space: nowrap;
+  display: block;
+}
+.jh-nav-link:hover,
+.jh-nav-link.router-link-active {
+  color: #fff;
+  background: rgba(255, 255, 255, .08);
+}
+
+.jh-btn-signin {
+  border: 1.5px solid rgba(255, 255, 255, .5);
+  color: #fff;
+  background: rgba(255, 255, 255, .1);
+  border-radius: 8px;
+  font-size: .875rem;
+  font-weight: 600;
+  padding: .4rem 1.1rem;
+  transition: all .2s;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.jh-btn-signin:hover {
+  background: rgba(255, 255, 255, .2);
+  border-color: #fff;
+  color: #fff;
+}
+
+.jh-btn-signup {
+  background: var(--jh-indigo);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: .875rem;
+  font-weight: 600;
+  padding: .4rem 1.1rem;
+  transition: all .2s;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.jh-btn-signup:hover {
+  background: var(--jh-indigo-d);
+  transform: translateY(-1px);
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════ */
+.jh-footer {
+  border-top: 1px solid var(--jh-border);
+  font-size: .78rem;
+  color: #94A3B8;
+}
+.jh-footer a {
+  color: var(--jh-indigo);
+  text-decoration: none;
+  font-weight: 500;
+}
+.jh-footer a:hover { text-decoration: underline; }
