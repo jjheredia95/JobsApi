@@ -1,4 +1,4 @@
-package com.jobshub.junit;
+package com.jobshub.service;
 
 import com.jobshub.dto.category.CategoryFormResponseDto;
 import com.jobshub.dto.category.CategoryResponse;

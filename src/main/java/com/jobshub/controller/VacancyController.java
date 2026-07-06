@@ -2,7 +2,7 @@ package com.jobshub.controller;
 
 import com.jobshub.dto.vacancy.*;
 import com.jobshub.model.Vacancy;
-import com.jobshub.junit.VacancyService;
+import com.jobshub.service.VacancyService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

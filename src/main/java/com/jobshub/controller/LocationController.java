@@ -2,7 +2,7 @@ package com.jobshub.controller;
 
 import com.jobshub.dto.location.LocationCreationDto;
 import com.jobshub.dto.location.LocationDto;
-import com.jobshub.junit.LocationService;
+import com.jobshub.service.LocationService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

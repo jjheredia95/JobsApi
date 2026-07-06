@@ -1,7 +1,7 @@
 package com.jobshub.controller;
 
 import com.jobshub.dto.vacancy.VacancyHomeDto;
-import com.jobshub.junit.VacancyService;
+import com.jobshub.service.VacancyService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

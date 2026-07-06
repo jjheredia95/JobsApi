@@ -1,4 +1,4 @@
-package com.jobshub.junit;
+package com.jobshub.service;
 
 import com.jobshub.dto.location.LocationDto;
 import com.jobshub.dto.vacancy.*;
@@ -53,6 +53,7 @@ public class VacancyService {
         return vacancies.stream().map(this::toFullDto).toList();
     }
 
+    //Create a vacancy
     public VacancyFullDto createNewVacancy(VacancyCreationDto vacancyDto) {
         String vacancyName = vacancyDto.name().trim();
         LocalDate publishedDate = LocalDate.now();

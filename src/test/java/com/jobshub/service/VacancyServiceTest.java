@@ -1,4 +1,4 @@
-package com.jobshub.junit;
+package com.jobshub.service;
 
 import com.jobshub.dto.vacancy.VacancyCreationDto;
 import com.jobshub.dto.vacancy.VacancyFullDto;

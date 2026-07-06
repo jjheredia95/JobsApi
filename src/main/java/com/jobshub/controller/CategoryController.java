@@ -2,7 +2,7 @@ package com.jobshub.controller;
 
 import com.jobshub.dto.category.CategoryFormResponseDto;
 import com.jobshub.dto.category.CategoryResponse;
-import com.jobshub.junit.CategoryService;
+import com.jobshub.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
