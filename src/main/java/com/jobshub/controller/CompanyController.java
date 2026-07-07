@@ -37,6 +37,13 @@ public class CompanyController {
         return ResponseEntity.ok(updated);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<CompanyResponseDto> getCompany(@PathVariable Integer id) {
+        return ResponseEntity.ok(companyService.getCompanyById(id));
+    }
+
+
+
 
 
 

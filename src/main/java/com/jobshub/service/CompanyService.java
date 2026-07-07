@@ -43,14 +43,14 @@ public class CompanyService {
     }
 
     // ============ getCompanyById ============
-    public Company getCompanyById(Integer id) {
-        return companyRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("Company not found with id: " + id));
+    public CompanyResponseDto getCompanyById(Integer id) {
+        Company company = findCompanyByIdOrThrow(id);
+        return mappingToCompanyDto(company);
     }
 
     // ============ updateCompany ============
     public CompanyResponseDto updateCompany(Integer id, CompanyFormDto dto) {
-        Company existingCompany = getCompanyById(id);
+        Company existingCompany = findCompanyByIdOrThrow(id);
 
         if (companyRepo.existsByNameIgnoreCaseAndIdNot(dto.name(), id)) {
             throw new BadRequestException("A company with this name already exists.");
@@ -74,6 +74,11 @@ public class CompanyService {
                 company.getDescription(),
                 company.getWebsite(),
                 company.getHeadquarters());
+    }
+
+    private Company findCompanyByIdOrThrow(Integer id) {
+        return companyRepo.findById(id)
+                .orElseThrow(() -> new NotFoundException("Company not found with id: " + id));
     }
 
 
