@@ -34,4 +34,10 @@ public class VacancySpecification {
                 cb.equal(root.get("workMode"), WorkMode.valueOf(workMode.toUpperCase()));
     }
 
+    public static Specification<Vacancy> hasCompany(Integer companyId) {
+        return ((root, query, criteriaBuilder) -> companyId == null ? null :
+                criteriaBuilder.equal(
+                        root.get("company").get("id"), companyId));
+    }
+
 }

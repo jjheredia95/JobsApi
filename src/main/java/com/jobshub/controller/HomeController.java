@@ -27,6 +27,7 @@ public class HomeController {
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) String workMode,
             @RequestParam(required = false) Integer locationId,
+            @RequestParam(required = false) Integer companyId,
             @RequestParam() int page,
             @RequestParam() int size) {
 
@@ -34,9 +35,10 @@ public class HomeController {
         System.out.println("CategoryId: " + categoryId);
         System.out.println("Work Mode: " + workMode);
         System.out.println("LocationId: " + locationId);
+        System.out.println("CompanyId: " + companyId);
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<VacancyHomeDto> result = vacancyService.homeVacancies(description, categoryId, workMode, locationId, pageable);
+        Page<VacancyHomeDto> result = vacancyService.homeVacancies(description, categoryId, workMode, locationId, companyId, pageable);
 
         if (result.isEmpty()) {
             return ResponseEntity.ok("No available vacancies");

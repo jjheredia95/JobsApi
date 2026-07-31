@@ -239,11 +239,11 @@ public class VacancyService {
 
     // Applying filters & Pagination
     public Page<VacancyHomeDto> homeVacancies(String description, Integer categoryId,
-                                              String workMode, Integer locationId, Pageable pageable) {
+                                              String workMode, Integer locationId, Integer companyId, Pageable pageable) {
         Page<Vacancy> vacancies;
 
         // No Filter
-        if (categoryId == null && description == null && locationId == null && workMode == null) {
+        if (categoryId == null && description == null && locationId == null && workMode == null && companyId == null) {
             vacancies = vacancyRepo.findByFeaturedAndStatusOrderByIdAsc(true, VacancyStatus.OPEN, pageable);
         }
         else {
@@ -251,6 +251,7 @@ public class VacancyService {
                     Specification.where(VacancySpecification.hasDescription(description))
                             .and(VacancySpecification.hasCategory(categoryId))
                             .and(VacancySpecification.hasLocation(locationId))
+                            .and(VacancySpecification.hasCompany(companyId))
                             .and(VacancySpecification.hasWorkMode(workMode)), pageable);
         }
 
