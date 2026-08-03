@@ -238,17 +238,21 @@ public class VacancyService {
     }
 
     // Applying filters & Pagination
-    public Page<VacancyHomeDto> homeVacancies(String description, Integer categoryId,
+    public Page<VacancyHomeDto> homeVacancies(String search, Integer categoryId,
                                               String workMode, Integer locationId, Integer companyId, Pageable pageable) {
         Page<Vacancy> vacancies;
 
+        boolean noFilters = categoryId == null && locationId == null
+                && workMode == null && companyId == null
+                && (search == null || search.isBlank());
+
         // No Filter
-        if (categoryId == null && description == null && locationId == null && workMode == null && companyId == null) {
+        if (noFilters) {
             vacancies = vacancyRepo.findByFeaturedAndStatusOrderByIdAsc(true, VacancyStatus.OPEN, pageable);
         }
         else {
             vacancies = vacancyRepo.findAll(
-                    Specification.where(VacancySpecification.hasDescription(description))
+                    Specification.where(VacancySpecification.matchesSearch(search))
                             .and(VacancySpecification.hasCategory(categoryId))
                             .and(VacancySpecification.hasLocation(locationId))
                             .and(VacancySpecification.hasCompany(companyId))

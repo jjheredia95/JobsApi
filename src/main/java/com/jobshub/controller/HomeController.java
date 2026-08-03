@@ -23,7 +23,7 @@ public class HomeController {
 
     @GetMapping
     public ResponseEntity<?> getHomeVacancies(
-            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String search,
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) String workMode,
             @RequestParam(required = false) Integer locationId,
@@ -31,14 +31,14 @@ public class HomeController {
             @RequestParam() int page,
             @RequestParam() int size) {
 
-        System.out.println("Description: " + description);
+        System.out.println("Search: " + search);
         System.out.println("CategoryId: " + categoryId);
         System.out.println("Work Mode: " + workMode);
         System.out.println("LocationId: " + locationId);
         System.out.println("CompanyId: " + companyId);
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<VacancyHomeDto> result = vacancyService.homeVacancies(description, categoryId, workMode, locationId, companyId, pageable);
+        Page<VacancyHomeDto> result = vacancyService.homeVacancies(search, categoryId, workMode, locationId, companyId, pageable);
 
         if (result.isEmpty()) {
             return ResponseEntity.ok("No available vacancies");

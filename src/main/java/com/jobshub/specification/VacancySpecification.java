@@ -5,7 +5,11 @@ import com.jobshub.model.Vacancy;
 import com.jobshub.model.enums.WorkMode;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class VacancySpecification {
 
@@ -15,10 +19,23 @@ public class VacancySpecification {
                         root.get("category").get("id"), categoryId));
     }
 
-    public static Specification<Vacancy> hasDescription(String description) {
-        return ((root, query, criteriaBuilder) -> description == null ? null :
-                criteriaBuilder.like(criteriaBuilder.lower(
-                        root.get("description")), "%" + description.toLowerCase() + "%"));
+    public static Specification<Vacancy> matchesSearch(String search) {
+        return (root, query, cb) -> {
+            if (search == null || search.isBlank()) return null;
+
+            String[] tokens = search.toLowerCase().trim().split("\\s+");
+            List<Predicate> tokenPredicates = new ArrayList<>();
+
+            for (int i = 0; i < Math.min(tokens.length, 5); i++) {
+                String pattern = "%" + tokens[i] + "%";
+                tokenPredicates.add(cb.or(
+                        cb.like(cb.lower(root.get("name")), pattern),
+                        cb.like(cb.lower(root.get("description")), pattern)
+                ));
+            }
+
+            return cb.and(tokenPredicates.toArray(new Predicate[0]));
+        };
     }
 
     public static Specification<Vacancy> hasLocation(Integer locationId) {
