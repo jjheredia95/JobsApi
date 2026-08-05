@@ -1,6 +1,7 @@
 package com.jobshub.controller;
 
 import com.jobshub.dto.vacancy.VacancyHomeDto;
+import com.jobshub.model.enums.EmploymentType;
 import com.jobshub.service.VacancyService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,27 +23,19 @@ public class HomeController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getHomeVacancies(
+    public ResponseEntity<Page<VacancyHomeDto>> getHomeVacancies(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) String workMode,
             @RequestParam(required = false) Integer locationId,
             @RequestParam(required = false) Integer companyId,
-            @RequestParam() int page,
-            @RequestParam() int size) {
-
-        System.out.println("Search: " + search);
-        System.out.println("CategoryId: " + categoryId);
-        System.out.println("Work Mode: " + workMode);
-        System.out.println("LocationId: " + locationId);
-        System.out.println("CompanyId: " + companyId);
-
+            @RequestParam(required = false) String employmentType,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        
         Pageable pageable = PageRequest.of(page, size);
-        Page<VacancyHomeDto> result = vacancyService.homeVacancies(search, categoryId, workMode, locationId, companyId, pageable);
+        Page<VacancyHomeDto> result = vacancyService.homeVacancies(search, categoryId, workMode, locationId, companyId, employmentType, pageable);
 
-        if (result.isEmpty()) {
-            return ResponseEntity.ok("No available vacancies");
-        }
         return ResponseEntity.ok(result);
     }
 

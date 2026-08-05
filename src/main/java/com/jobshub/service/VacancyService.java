@@ -23,7 +23,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class VacancyService {
@@ -239,11 +241,13 @@ public class VacancyService {
 
     // Applying filters & Pagination
     public Page<VacancyHomeDto> homeVacancies(String search, Integer categoryId,
-                                              String workMode, Integer locationId, Integer companyId, Pageable pageable) {
+                                              String workMode, Integer locationId, Integer companyId, String employmentType, Pageable pageable) {
         Page<Vacancy> vacancies;
 
         boolean noFilters = categoryId == null && locationId == null
-                && workMode == null && companyId == null
+                && (workMode == null || workMode.isBlank())
+                && (employmentType == null || employmentType.isBlank())
+                && companyId == null
                 && (search == null || search.isBlank());
 
         // No Filter
@@ -251,12 +255,16 @@ public class VacancyService {
             vacancies = vacancyRepo.findByFeaturedAndStatusOrderByIdAsc(true, VacancyStatus.OPEN, pageable);
         }
         else {
+            WorkMode parsedWorkMode = parseWorkMode(workMode);
+            EmploymentType parsedEmploymentType = parseEmploymentType(employmentType);
+
             vacancies = vacancyRepo.findAll(
                     Specification.where(VacancySpecification.matchesSearch(search))
                             .and(VacancySpecification.hasCategory(categoryId))
                             .and(VacancySpecification.hasLocation(locationId))
                             .and(VacancySpecification.hasCompany(companyId))
-                            .and(VacancySpecification.hasWorkMode(workMode)), pageable);
+                            .and(VacancySpecification.hasEmploymentType(parsedEmploymentType))
+                            .and(VacancySpecification.hasWorkMode(parsedWorkMode)), pageable);
         }
 
         return vacancies.map(vacancy -> new VacancyHomeDto(
@@ -266,6 +274,36 @@ public class VacancyService {
                 vacancy.getPublishedDate(),
                 vacancy.getStatus(),
                 vacancy.getDescription()));
+    }
+
+    private WorkMode parseWorkMode(String workMode) {
+        if (workMode == null || workMode.isBlank()) {
+            return null;
+        }
+
+        try {
+            return WorkMode.valueOf(workMode.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            String validValues = String.join(", ", Arrays.stream(WorkMode.values())
+                    .map(Enum::name)
+                    .toList());
+            throw new BadRequestException("Invalid work mode. Valid values: " + validValues);
+        }
+    }
+
+    private EmploymentType parseEmploymentType(String employmentType) {
+        if (employmentType == null || employmentType.isBlank()) {
+            return null;
+        }
+
+        try {
+            return EmploymentType.valueOf(employmentType.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            String validValues = String.join(", ", Arrays.stream(EmploymentType.values())
+                    .map(Enum::name)
+                    .toList());
+            throw new BadRequestException("Invalid employment type. Valid values: " + validValues);
+        }
     }
 
     public VacancyDetailsDto showVacancyDetails(Integer id) {
