@@ -28,13 +28,12 @@ public class HomeController {
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) String workMode,
             @RequestParam(required = false) Integer locationId,
-            @RequestParam(required = false) Integer companyId,
             @RequestParam(required = false) String employmentType,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         
         Pageable pageable = PageRequest.of(page, size);
-        Page<VacancyHomeDto> result = vacancyService.homeVacancies(search, categoryId, workMode, locationId, companyId, employmentType, pageable);
+        Page<VacancyHomeDto> result = vacancyService.homeVacancies(search, categoryId, workMode, locationId, employmentType, pageable);
 
         return ResponseEntity.ok(result);
     }

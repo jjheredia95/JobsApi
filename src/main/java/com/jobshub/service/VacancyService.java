@@ -241,13 +241,12 @@ public class VacancyService {
 
     // Applying filters & Pagination
     public Page<VacancyHomeDto> homeVacancies(String search, Integer categoryId,
-                                              String workMode, Integer locationId, Integer companyId, String employmentType, Pageable pageable) {
+                                              String workMode, Integer locationId, String employmentType, Pageable pageable) {
         Page<Vacancy> vacancies;
 
         boolean noFilters = categoryId == null && locationId == null
                 && (workMode == null || workMode.isBlank())
                 && (employmentType == null || employmentType.isBlank())
-                && companyId == null
                 && (search == null || search.isBlank());
 
         // No Filter
@@ -262,7 +261,6 @@ public class VacancyService {
                     Specification.where(VacancySpecification.matchesSearch(search))
                             .and(VacancySpecification.hasCategory(categoryId))
                             .and(VacancySpecification.hasLocation(locationId))
-                            .and(VacancySpecification.hasCompany(companyId))
                             .and(VacancySpecification.hasEmploymentType(parsedEmploymentType))
                             .and(VacancySpecification.hasWorkMode(parsedWorkMode)), pageable);
         }
@@ -276,6 +274,7 @@ public class VacancyService {
                 vacancy.getDescription()));
     }
 
+    //
     private WorkMode parseWorkMode(String workMode) {
         if (workMode == null || workMode.isBlank()) {
             return null;

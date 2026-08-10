@@ -52,11 +52,11 @@ public class VacancySpecification {
                 cb.equal(root.get("workMode"), workMode);
     }
 
-    public static Specification<Vacancy> hasCompany(Integer companyId) {
+    /*public static Specification<Vacancy> hasCompany(Integer companyId) {
         return ((root, query, criteriaBuilder) -> companyId == null ? null :
                 criteriaBuilder.equal(
                         root.get("company").get("id"), companyId));
-    }
+    }*/
 
     public static Specification<Vacancy> hasEmploymentType(EmploymentType employmentType) {
         return (root, query, cb) -> employmentType == null ? null :
