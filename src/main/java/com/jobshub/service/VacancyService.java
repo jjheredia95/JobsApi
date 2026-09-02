@@ -22,6 +22,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -326,6 +329,13 @@ public class VacancyService {
                         vacancy.getCompany().getHeadquarters()
                 ), vacancy.getLocations().stream().map(
                         location -> new LocationDto(location.getId(), location.getCity(), location.getState())).toList());
+    }
+
+    // method to automatically change status to closed
+    @Transactional
+    @Scheduled(cron = "0 0 0 * * *")
+    public void closeExpiredVacancies() {
+        vacancyRepo.closeExpiredVacancies(LocalDate.now(), VacancyStatus.CLOSED);
     }
 
 }
