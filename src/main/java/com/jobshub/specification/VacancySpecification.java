@@ -1,11 +1,6 @@
 package com.jobshub.specification;
 
-import com.jobshub.model.Location;
 import com.jobshub.model.Vacancy;
-import com.jobshub.model.enums.EmploymentType;
-import com.jobshub.model.enums.WorkMode;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -37,30 +32,6 @@ public class VacancySpecification {
 
             return cb.and(tokenPredicates.toArray(new Predicate[0]));
         };
-    }
-
-    public static Specification<Vacancy> hasLocation(Integer locationId) {
-        return (root, query, cb) -> {
-            if (locationId == null) return null;
-            Join<Vacancy, Location> locationJoin = root.join("locations", JoinType.INNER);
-            return cb.equal(locationJoin.get("id"), locationId);
-        };
-    }
-
-    public static Specification<Vacancy> hasWorkMode(WorkMode workMode) {
-        return (root, query, cb) -> workMode == null ? null :
-                cb.equal(root.get("workMode"), workMode);
-    }
-
-    /*public static Specification<Vacancy> hasCompany(Integer companyId) {
-        return ((root, query, criteriaBuilder) -> companyId == null ? null :
-                criteriaBuilder.equal(
-                        root.get("company").get("id"), companyId));
-    }*/
-
-    public static Specification<Vacancy> hasEmploymentType(EmploymentType employmentType) {
-        return (root, query, cb) -> employmentType == null ? null :
-                cb.equal(root.get("employmentType"), employmentType);
     }
 
 }

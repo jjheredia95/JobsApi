@@ -1,7 +1,6 @@
 package com.jobshub.controller;
 
 import com.jobshub.dto.vacancy.VacancyHomeDto;
-import com.jobshub.model.enums.EmploymentType;
 import com.jobshub.service.VacancyService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,14 +25,11 @@ public class HomeController {
     public ResponseEntity<Page<VacancyHomeDto>> getHomeVacancies(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Integer categoryId,
-            @RequestParam(required = false) String workMode,
-            @RequestParam(required = false) Integer locationId,
-            @RequestParam(required = false) String employmentType,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(required = true) int page,
+            @RequestParam(required = true) int size) {
         
         Pageable pageable = PageRequest.of(page, size);
-        Page<VacancyHomeDto> result = vacancyService.homeVacancies(search, categoryId, workMode, locationId, employmentType, pageable);
+        Page<VacancyHomeDto> result = vacancyService.homeVacancies(search, categoryId, pageable);
 
         return ResponseEntity.ok(result);
     }
