@@ -21,10 +21,9 @@ public record VacancyUpdateDto(
         @Positive(message = "Category id must be greater than 0")
         Integer categoryId,//
 
-        @NotNull(message = "Open date is required")
-        LocalDate openDate,//
 
-        LocalDate closeDate,//
+        LocalDate openDate,
+        LocalDate closeDate,
 
         @Positive(message = "Salary must be greater than 0")
         @DecimalMax(value = "1000000", inclusive = true, message = "Salary must not exceed 1000000")
@@ -51,13 +50,10 @@ public record VacancyUpdateDto(
         @NotNull(message = "Featured is required")
         Boolean featured,
 
-        @NotNull(message = "Status is required")
         VacancyStatus status,
 
-        @NotNull(message = "Work mode is required")
         WorkMode workMode,
 
-        @NotNull(message = "Employment type is required")
         EmploymentType employmentType
 
 ) {

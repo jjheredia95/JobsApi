@@ -137,11 +137,11 @@ public class VacancyService {
 
     // Reusing logic
     private void validateCorrectDates(LocalDate openDate, LocalDate closeDate, LocalDate publishedDate) {
-        if (openDate.isBefore(publishedDate)) {
+        if (openDate != null && openDate.isBefore(publishedDate)) {
             throw new BadRequestException("Open date cannot be before published date");
         }
 
-        if (closeDate != null && closeDate.isBefore(openDate)) {
+        if (closeDate != null && openDate != null && closeDate.isBefore(openDate)) {
             throw new BadRequestException("Close date cannot be before open date");
         }
     }
@@ -212,19 +212,24 @@ public class VacancyService {
                                  Category category, Company company, List<Location> locations) {
 
         Vacancy newVacancy = new Vacancy();
-        newVacancy.setName(vacancyName);
-        newVacancy.setDescription(vacancyDto.description());
-        newVacancy.setSalary(vacancyDto.salary());
+
+        newVacancy.setName(vacancyName);//
+        newVacancy.setDescription(vacancyDto.description());//
+        newVacancy.setSalary(vacancyDto.salary());//
         newVacancy.setPublishedDate(publishedDate);
-        newVacancy.setOpenDate(vacancyDto.openDate());
-        newVacancy.setCloseDate(vacancyDto.closeDate());
-        newVacancy.setFeatured(false);
-        newVacancy.setStatus(VacancyStatus.PUBLISHED);
+
+        // Optional Dates - can be NULL
+        newVacancy.setOpenDate(vacancyDto.openDate());//
+        newVacancy.setCloseDate(vacancyDto.closeDate());//
+
+
+        newVacancy.setFeatured(false); // A new vacancy won't be featured by default.
+        newVacancy.setStatus(VacancyStatus.PUBLISHED); // A new vacancy will be display published by default.
+
+
         newVacancy.setCategory(category);
-        newVacancy.setDetails(vacancyDto.details());
-        newVacancy.setWorkMode(WorkMode.ONSITE);
-        newVacancy.setEmploymentType(EmploymentType.FULL_TIME);
-        newVacancy.setCompany(company);
+        newVacancy.setDetails(vacancyDto.details());//
+        newVacancy.setCompany(company);//
         newVacancy.setLocations(locations);
         newVacancy.setImage(vacancyDto.image());
 
@@ -252,7 +257,7 @@ public class VacancyService {
         }
         else {
             vacancies = vacancyRepo.findAll(
-                    Specification.where(VacancySpecification.matchesSearch(search))
+                    Specification.where(VacancySpecification.hasDescription(search))
                             .and(VacancySpecification.hasCategory(categoryId)), pageable);
         }
 

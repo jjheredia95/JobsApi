@@ -18,10 +18,8 @@ public record VacancyCreationDto(
         @Positive(message = "Category is required")
         Integer categoryId,//
 
-        @NotNull(message = "Open date is required")
-        LocalDate openDate,//
-
-        LocalDate closeDate,//
+        LocalDate openDate,
+        LocalDate closeDate,
 
         @Positive(message = "Salary must be greater than 0")
         @DecimalMax(value = "1000000", inclusive = true, message = "Salary must not exceed 1000000")

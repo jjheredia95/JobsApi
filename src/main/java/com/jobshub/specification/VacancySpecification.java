@@ -15,7 +15,7 @@ public class VacancySpecification {
                         root.get("category").get("id"), categoryId));
     }
 
-    public static Specification<Vacancy> matchesSearch(String search) {
+    public static Specification<Vacancy> hasDescription(String search) {
         return (root, query, cb) -> {
             if (search == null || search.isBlank()) return null;
 

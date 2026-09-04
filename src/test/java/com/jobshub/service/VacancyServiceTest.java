@@ -147,6 +147,37 @@ public class VacancyServiceTest {
     }
 
     @Test
+    void createNewVacancy_success_WhenDatesAreNull() {
+        VacancyCreationDto dto = new VacancyCreationDto(
+                "Backend Developer",
+                "Build and maintain backend services",
+                1,
+                null,
+                null,
+                50000.0,
+                "image.png",
+                "Some extra details about the role",
+                1,
+                List.of(1)
+        );
+
+        when(categoryRepo.findById(1)).thenReturn(Optional.of(category));
+        when(companyRepo.findById(1)).thenReturn(Optional.of(company));
+        when(locationRepo.findAllById(List.of(1))).thenReturn(locations);
+        when(vacancyRepo.existsByNameIgnoreCaseAndCompany_Id(
+                "Backend Developer", 1)).thenReturn(false);
+        when(vacancyRepo.save(any(Vacancy.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        VacancyFullDto result = vacancyService.createNewVacancy(dto);
+
+        assertThat(result.openDate()).isNull();
+        assertThat(result.closeDate()).isNull();
+
+        verify(vacancyRepo).save(any(Vacancy.class));
+    }
+
+    @Test
     void createNewVacancy_ShouldThrow_WhenCategoryNotFound() {
         VacancyCreationDto dto = buildValidDto();
         when(categoryRepo.findById(1)).thenReturn(Optional.empty());
