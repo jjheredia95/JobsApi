@@ -246,28 +246,16 @@ public class VacancyService {
     }
 
     // Applying filters & Pagination
-    public Page<VacancyHomeDto> homeVacancies(String search, Integer categoryId, Pageable pageable) {
-        Page<Vacancy> vacancies;
-
-        boolean noFilters = categoryId == null && (search == null || search.isBlank());
-
-        // No Filter
-        if (noFilters) {
-            vacancies = vacancyRepo.findByFeaturedAndStatusOrderByIdAsc(true, VacancyStatus.OPEN, pageable);
-        }
-        else {
-            vacancies = vacancyRepo.findAll(
-                    Specification.where(VacancySpecification.hasDescription(search))
-                            .and(VacancySpecification.hasCategory(categoryId)), pageable);
-        }
-
-        return vacancies.map(vacancy -> new VacancyHomeDto(
-                vacancy.getId(),
-                vacancy.getCategory().getName(),
-                vacancy.getName(),
-                vacancy.getPublishedDate(),
-                vacancy.getStatus(),
-                vacancy.getDescription()));
+    public List<VacancyHomeDto> getHomeVacancies() {
+        List<Vacancy> vacancies = vacancyRepo.findAll();
+        return vacancies.stream()
+                .map(vacancy -> new VacancyHomeDto(
+                        vacancy.getId(),
+                        vacancy.getCategory().getName(),
+                        vacancy.getName(),
+                        vacancy.getPublishedDate(),
+                        vacancy.getStatus(),
+                        vacancy.getDescription())).toList();
     }
 
     public VacancyDetailsDto showVacancyDetails(Integer id) {
