@@ -246,16 +246,15 @@ public class VacancyService {
     }
 
     // Applying filters & Pagination
-    public List<VacancyHomeDto> getHomeVacancies() {
-        List<Vacancy> vacancies = vacancyRepo.findAll();
-        return vacancies.stream()
-                .map(vacancy -> new VacancyHomeDto(
+    public Page<VacancyHomeDto> getHomeVacancies(Pageable pagable) {
+        Page<Vacancy> vacancies = vacancyRepo.findAll(pagable);
+        return vacancies.map(vacancy -> new VacancyHomeDto(
                         vacancy.getId(),
                         vacancy.getCategory().getName(),
                         vacancy.getName(),
                         vacancy.getPublishedDate(),
                         vacancy.getStatus(),
-                        vacancy.getDescription())).toList();
+                        vacancy.getDescription()));
     }
 
     public VacancyDetailsDto showVacancyDetails(Integer id) {

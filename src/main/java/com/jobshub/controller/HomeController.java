@@ -24,10 +24,15 @@ public class HomeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<VacancyHomeDto>> homeVacancies() {
-        System.out.println("homeVacancies: " + vacancyService.getHomeVacancies());
-        return ResponseEntity.ok(vacancyService.getHomeVacancies());
+    public ResponseEntity<Page<VacancyHomeDto>> homeVacancies(
+            @RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "5") Integer size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<VacancyHomeDto> result = vacancyService.getHomeVacancies(pageable);
+        return ResponseEntity.ok(result);
     }
+
+
 
 
 
