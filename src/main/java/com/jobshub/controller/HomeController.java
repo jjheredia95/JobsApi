@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("api/home")
 public class HomeController {
@@ -25,10 +23,13 @@ public class HomeController {
 
     @GetMapping
     public ResponseEntity<Page<VacancyHomeDto>> homeVacancies(
-            @RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "5") Integer size) {
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) Integer idCategory,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "5") Integer size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<VacancyHomeDto> result = vacancyService.getHomeVacancies(pageable);
+        Page<VacancyHomeDto> result = vacancyService.getHomeVacancies(description, idCategory, pageable);
         return ResponseEntity.ok(result);
     }
 

@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 //imports to automatically change status
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 import java.time.LocalDate;
 
 
@@ -20,6 +22,13 @@ public interface VacancyRepo extends JpaRepository<Vacancy, Integer>, JpaSpecifi
     boolean existsByNameIgnoreCaseAndCompany_IdAndIdNot(String name, Integer companyId, Integer id);
 
     Page<Vacancy> findByFeaturedAndStatusOrderByIdAsc(boolean featured, VacancyStatus status, Pageable pageable);
+
+    @Query("""
+    SELECT v FROM Vacancy v WHERE ((:categoryId IS NULL OR v.category.id = :categoryId))""")
+    Page<Vacancy> searchVacancies(@Param("description") String d, @Param("categoryId") Integer c, Pageable pageable);
+
+
+
 
     @Modifying
     @Query("""
