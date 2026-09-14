@@ -249,15 +249,20 @@ public class VacancyService {
     public Page<VacancyHomeDto> getHomeVacancies(String description, Integer catId, Pageable pagable) {
         Page<Vacancy> vacancies;
 
-        if (catId == null /*&& (description == null || description.isBlank())*/)  {
+        if (catId == null && (description == null || description.isBlank())) {
             vacancies = vacancyRepo.findByFeaturedAndStatusOrderByIdAsc(true, VacancyStatus.OPEN, pagable);
         }
         else {
-
-
+            vacancies = vacancyRepo.searchVacancies(description, catId, pagable);
         }
 
-        return null;
+        return vacancies.map(vacancy -> new VacancyHomeDto(
+                vacancy.getId(),
+                vacancy.getCategory().getName(),
+                vacancy.getName(),
+                vacancy.getPublishedDate(),
+                vacancy.getStatus(),
+                vacancy.getDescription()));
     }
 
     public VacancyDetailsDto showVacancyDetails(Integer id) {
