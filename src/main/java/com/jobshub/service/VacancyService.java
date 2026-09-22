@@ -246,10 +246,14 @@ public class VacancyService {
     }
 
     // Applying filters & Pagination
-    public Page<VacancyHomeDto> getHomeVacancies(String description, Integer catId, Pageable pagable) {
+    public Page<VacancyHomeDto> getHomeVacancies(Boolean all, String description, Integer catId, Pageable pagable) {
         Page<Vacancy> vacancies;
 
-        if (catId == null && (description == null || description.isBlank())) {
+        if (Boolean.TRUE.equals(all)) {
+            vacancies = vacancyRepo.findByStatusOrderByNameAsc(VacancyStatus.OPEN, pagable);
+        }
+
+        else if (catId == null && (description == null || description.isBlank())) {
             vacancies = vacancyRepo.findByFeaturedAndStatusOrderByIdAsc(true, VacancyStatus.OPEN, pagable);
         }
         else {

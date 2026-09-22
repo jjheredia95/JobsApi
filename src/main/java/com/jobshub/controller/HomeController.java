@@ -23,13 +23,15 @@ public class HomeController {
 
     @GetMapping
     public ResponseEntity<Page<VacancyHomeDto>> homeVacancies(
+            @RequestParam(required = false) Boolean all,
             @RequestParam(required = false) String description,
             @RequestParam(required = false) Integer categoryId,
+
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "5") Integer size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<VacancyHomeDto> result = vacancyService.getHomeVacancies(description, categoryId, pageable);
+        Page<VacancyHomeDto> result = vacancyService.getHomeVacancies(all, description, categoryId, pageable);
         return ResponseEntity.ok(result);
     }
 

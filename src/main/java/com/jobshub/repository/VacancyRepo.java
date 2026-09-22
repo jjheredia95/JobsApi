@@ -23,6 +23,8 @@ public interface VacancyRepo extends JpaRepository<Vacancy, Integer>, JpaSpecifi
 
     Page<Vacancy> findByFeaturedAndStatusOrderByIdAsc(boolean featured, VacancyStatus status, Pageable pageable);
 
+    Page<Vacancy> findByStatusOrderByNameAsc(VacancyStatus status, Pageable pageable);
+
     // TODO: support multi-word search (currently matches exact phrase only — "software developer" won't match "developer" alone)
     @Query("""
     SELECT v FROM Vacancy v
