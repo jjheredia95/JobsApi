@@ -208,8 +208,13 @@ public class VacancyService {
     }
 
 
-    private Vacancy buildVacancy(VacancyCreationDto vacancyDto, String vacancyName, LocalDate publishedDate,
-                                 Category category, Company company, List<Location> locations) {
+    private Vacancy buildVacancy(
+            VacancyCreationDto vacancyDto,
+            String vacancyName,
+            LocalDate publishedDate,
+            Category category,
+            Company company,
+            List<Location> locations) {
 
         Vacancy newVacancy = new Vacancy();
 
@@ -246,18 +251,38 @@ public class VacancyService {
     }
 
     // Applying filters & Pagination
-    public Page<VacancyHomeDto> getHomeVacancies(Boolean all, String description, Integer catId, Pageable pagable) {
+    public Page<VacancyHomeDto> getHomeVacancies(
+            Boolean all,
+            String description,
+            Integer catId,
+            Pageable pageable) {
+
         Page<Vacancy> vacancies;
 
+        // All = OPEN
         if (Boolean.TRUE.equals(all)) {
-            vacancies = vacancyRepo.findByStatusOrderByNameAsc(VacancyStatus.OPEN, pagable);
+            vacancies = vacancyRepo.findByStatusOrderByNameAsc(
+                    VacancyStatus.OPEN,
+                    pageable
+            );
         }
 
+        // Default = Featured + OPEN
         else if (catId == null && (description == null || description.isBlank())) {
-            vacancies = vacancyRepo.findByFeaturedAndStatusOrderByIdAsc(true, VacancyStatus.OPEN, pagable);
+            vacancies = vacancyRepo.findByFeaturedAndStatusOrderByIdAsc(
+                    true,
+                    VacancyStatus.OPEN,
+                    pageable
+            );
         }
+
         else {
-            vacancies = vacancyRepo.searchVacancies(description, catId, pagable);
+            vacancies = vacancyRepo.searchVacancies(
+                    description,
+                    catId,
+                    VacancyStatus.OPEN,
+                    pageable
+            );
         }
 
         return vacancies.map(vacancy -> new VacancyHomeDto(
@@ -266,7 +291,8 @@ public class VacancyService {
                 vacancy.getName(),
                 vacancy.getPublishedDate(),
                 vacancy.getStatus(),
-                vacancy.getDescription()));
+                vacancy.getDescription()
+        ));
     }
 
     public VacancyDetailsDto showVacancyDetails(Integer id) {

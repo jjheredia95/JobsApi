@@ -28,11 +28,20 @@ public interface VacancyRepo extends JpaRepository<Vacancy, Integer>, JpaSpecifi
     // TODO: support multi-word search (currently matches exact phrase only — "software developer" won't match "developer" alone)
     @Query("""
     SELECT v FROM Vacancy v
-    WHERE (:description is null or :description = '' or
-         lower(v.name) like lower(concat('%', :description, '%') ) or
-         lower(v.description) like lower(concat('%', :description, '%') ) )
-    AND (:categoryId is null or v.category.id = :categoryId)""")
-    Page<Vacancy> searchVacancies(@Param("description") String des, @Param("categoryId") Integer catId, Pageable pageable);
+    WHERE v.status = :status
+    AND (
+        :description is null
+         or :description = ''
+         or lower(v.name) like lower(concat('%', :description, '%') )
+         or lower(v.description) like lower(concat('%', :description, '%') ) )
+    AND (
+        :categoryId is null
+         or v.category.id = :categoryId)
+    """)
+    Page<Vacancy> searchVacancies(
+            @Param("description") String des,
+            @Param("categoryId") Integer catId,
+            @Param("status") VacancyStatus status, Pageable pageable);
 
 
 
