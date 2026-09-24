@@ -314,8 +314,13 @@ public class VacancyService {
                         vacancy.getCompany().getDescription(),
                         vacancy.getCompany().getWebsite(),
                         vacancy.getCompany().getHeadquarters()
-                ), vacancy.getLocations().stream().map(
-                        location -> new LocationDto(location.getId(), location.getCity(), location.getState())).toList());
+                ),
+                vacancy.getLocations()
+                .stream()
+                .map(location -> new LocationDto(
+                        location.getId(),
+                        location.getCity(),
+                        location.getState())).toList());
     }
 
     // method to automatically change status to closed
