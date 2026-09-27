@@ -23,14 +23,17 @@ public class VacancyController {
         this.vacancyService = vacancyService;
     }
 
-    @GetMapping()
-    public ResponseEntity<Page<VacancyListDto>> getAllVacancies(@RequestParam() int page,
-                                                                @RequestParam() int size) {
+    @GetMapping("/admin")
+    public ResponseEntity<Page<VacancyAdminListDto>> getAdminVacancies(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(vacancyService.getAllVacancies(pageable));
+        Page<VacancyAdminListDto> result = vacancyService.getAllVacanciesAdminList(pageable);
+        return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/full")
+    @GetMapping("/full") // (NO USAGE): TEST EVERYTHING FLOWS
     public ResponseEntity<List<VacancyFullDto>> getFullVacancies() {
         return ResponseEntity.ok(vacancyService.getFullVacancyDetails());
     }

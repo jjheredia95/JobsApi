@@ -9,17 +9,13 @@ import com.jobshub.model.Category;
 import com.jobshub.model.Company;
 import com.jobshub.model.Location;
 import com.jobshub.model.Vacancy;
-import com.jobshub.model.enums.EmploymentType;
 import com.jobshub.model.enums.VacancyStatus;
-import com.jobshub.model.enums.WorkMode;
 import com.jobshub.repository.CategoryRepo;
 import com.jobshub.repository.CompanyRepo;
 import com.jobshub.repository.LocationRepo;
 import com.jobshub.repository.VacancyRepo;
-import com.jobshub.specification.VacancySpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import org.springframework.scheduling.annotation.Scheduled;
@@ -46,15 +42,36 @@ public class VacancyService {
         this.locationRepo = locationRepo;
     }
 
-    public Page<VacancyListDto> getAllVacancies(Pageable pageable) {
+    public Page<VacancyAdminListDto> getAllVacanciesAdminList(Pageable pageable) {
         Page<Vacancy> vacancies = vacancyRepo.findAll(pageable);
-        return vacancies.map(this::toListDto);
+        return vacancies.map(vacancy -> new VacancyAdminListDto(
+                vacancy.getId(),
+                vacancy.getCompany().getName(),
+                vacancy.getCategory().getName(),
+                vacancy.getName(),
+                vacancy.getPublishedDate(),
+                vacancy.getCloseDate(),
+                vacancy.getStatus(),
+                vacancy.getFeatured()));
     }
+
+    /*private VacancyAdminListDto toListDto(Vacancy vacancy) {
+        return new VacancyAdminListDto(
+                vacancy.getId(),
+                vacancy.getCategory().getName(),
+                vacancy.getName(),
+                vacancy.getPublishedDate(),
+                vacancy.getFeatured(),
+                vacancy.getStatus()
+        );
+    }*/
 
     public List<VacancyFullDto> getFullVacancyDetails() {
         List<Vacancy> vacancies = vacancyRepo.findAll();
         return vacancies.stream().map(this::toFullDto).toList();
     }
+
+
 
     //Create a vacancy
     public VacancyFullDto createNewVacancy(VacancyCreationDto vacancyDto) {
@@ -94,16 +111,7 @@ public class VacancyService {
         return toFullDto(savedVacancy);
     }
 
-    private VacancyListDto toListDto(Vacancy vacancy) {
-        return new VacancyListDto(
-                vacancy.getId(),
-                vacancy.getCategory().getName(),
-                vacancy.getName(),
-                vacancy.getPublishedDate(),
-                vacancy.getFeatured(),
-                vacancy.getStatus()
-        );
-    }
+
 
     private VacancyFullDto toFullDto(Vacancy vacancy) {
         return new VacancyFullDto(

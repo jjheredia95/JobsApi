@@ -4,13 +4,16 @@ import com.jobshub.model.enums.VacancyStatus;
 
 import java.time.LocalDate;
 
-public record VacancyListDto(
+public record VacancyAdminListDto(
         Integer id,
-        String category,
+        String companyName,
+        String categoryName,
         String name,
         LocalDate publishedDate,
-        Boolean featured,
-        VacancyStatus status
+        LocalDate closingDate,
+        VacancyStatus status,
+        Boolean featured
+
 ) {
 }
 
