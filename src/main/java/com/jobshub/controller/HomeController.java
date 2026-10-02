@@ -26,7 +26,6 @@ public class HomeController {
             @RequestParam(required = false) Boolean all,
             @RequestParam(required = false) String description,
             @RequestParam(required = false) Integer categoryId,
-
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "5") Integer size) {
 

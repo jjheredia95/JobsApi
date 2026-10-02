@@ -42,8 +42,12 @@ public class VacancyService {
         this.locationRepo = locationRepo;
     }
 
-    public Page<VacancyAdminListDto> getAllVacanciesAdminList(Pageable pageable) {
-        Page<Vacancy> vacancies = vacancyRepo.findAll(pageable);
+    public Page<VacancyAdminListDto> getAllVacanciesAdminList(String name,
+                                                              Integer categoryId,
+                                                              Integer companyId,
+                                                              VacancyStatus status,
+                                                              Pageable pageable) {
+        Page<Vacancy> vacancies = vacancyRepo.searchAdminVacancies(name, categoryId, companyId, status, pageable);
         return vacancies.map(vacancy -> new VacancyAdminListDto(
                 vacancy.getId(),
                 vacancy.getCompany().getName(),

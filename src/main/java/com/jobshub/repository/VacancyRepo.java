@@ -44,6 +44,30 @@ public interface VacancyRepo extends JpaRepository<Vacancy, Integer>, JpaSpecifi
             @Param("status") VacancyStatus status, Pageable pageable);
 
 
+    @Query("""
+    select v from Vacancy v
+         where
+             (:name is null
+             or lower(v.name) like lower(concat('%', :name, '%') )
+             or lower(v.description) like lower(concat('%', :name, '%') ) )
+         and(
+             :categoryId is null
+             or v.category.id = :categoryId
+             )
+         and (
+             :companyId is null
+             or v.company.id = :companyId
+             )
+         and (:status is null
+             or v.status = :status)""")
+    Page<Vacancy> searchAdminVacancies(
+            @Param("name") String name,
+            @Param("categoryId") Integer categoryId,
+            @Param("companyId") Integer companyId,
+            @Param("status") VacancyStatus status,
+            Pageable pageable);
+
+
 
 
     @Modifying

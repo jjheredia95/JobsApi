@@ -2,6 +2,7 @@ package com.jobshub.controller;
 
 import com.jobshub.dto.vacancy.*;
 import com.jobshub.model.Vacancy;
+import com.jobshub.model.enums.VacancyStatus;
 import com.jobshub.service.VacancyService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -25,11 +26,15 @@ public class VacancyController {
 
     @GetMapping("/admin")
     public ResponseEntity<Page<VacancyAdminListDto>> getAdminVacancies(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) Integer companyId,
+            @RequestParam(required = false)VacancyStatus status,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "10") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<VacancyAdminListDto> result = vacancyService.getAllVacanciesAdminList(pageable);
+        Page<VacancyAdminListDto> result = vacancyService.getAllVacanciesAdminList(name, categoryId, companyId, status, pageable);
         return ResponseEntity.ok(result);
     }
 
