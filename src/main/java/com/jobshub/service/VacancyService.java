@@ -42,12 +42,20 @@ public class VacancyService {
         this.locationRepo = locationRepo;
     }
 
-    public Page<VacancyAdminListDto> getAllVacanciesAdminList(String name,
-                                                              Integer categoryId,
-                                                              Integer companyId,
-                                                              VacancyStatus status,
-                                                              Pageable pageable) {
-        Page<Vacancy> vacancies = vacancyRepo.searchAdminVacancies(name, categoryId, companyId, status, pageable);
+    public Page<VacancyAdminListDto> getAllVacanciesAdminList(String name, Integer categoryId, Integer companyId, String status, Pageable pageable) {
+
+       VacancyStatus vacancyStatus = null;
+
+        if (status != null && !status.isBlank()) {
+            try {
+                vacancyStatus = VacancyStatus.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Invalid vacancy status: " + status);
+
+            }
+        }
+
+        Page<Vacancy> vacancies = vacancyRepo.searchAdminVacancies(name, categoryId, companyId, vacancyStatus, pageable);
         return vacancies.map(vacancy -> new VacancyAdminListDto(
                 vacancy.getId(),
                 vacancy.getCompany().getName(),

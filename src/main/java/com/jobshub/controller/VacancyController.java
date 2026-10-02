@@ -5,15 +5,19 @@ import com.jobshub.model.Vacancy;
 import com.jobshub.model.enums.VacancyStatus;
 import com.jobshub.service.VacancyService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("api/vacancies")
 public class VacancyController {
@@ -29,9 +33,9 @@ public class VacancyController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) Integer companyId,
-            @RequestParam(required = false)VacancyStatus status,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<VacancyAdminListDto> result = vacancyService.getAllVacanciesAdminList(name, categoryId, companyId, status, pageable);

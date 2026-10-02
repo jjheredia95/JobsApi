@@ -8,6 +8,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import jakarta.validation.ConstraintViolationException;
 
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -67,15 +68,41 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<Map<String, Object>> handleBadRequest(BadRequestException ex, HttpServletRequest request) {
+    public ResponseEntity<Map<String, Object>> handleBadRequest(
+            BadRequestException ex,
+            HttpServletRequest request) {
+
+        return buildBadRequestResponse(ex.getMessage(), request);
+    }
+
+    // NEW EXCEPTION WHEN PAGE & SIZE ARE NOT VALID
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConstraintViolation(
+            ConstraintViolationException ex,
+            HttpServletRequest request) {
+
+        return buildBadRequestResponse(ex.getMessage(), request);
+    }
+
+    //EXTRACTING METHOD TO MANAGE SAME RESPONSE OF A BAD REQUEST EXCEPTION
+    private ResponseEntity<Map<String, Object>> buildBadRequestResponse(
+            String message,
+            HttpServletRequest request) {
+
         Map<String, Object> body = new LinkedHashMap<>();
+
         body.put("timestamp", LocalDate.now());
         body.put("status", HttpStatus.BAD_REQUEST.value());
         body.put("error", "Bad request");
-        body.put("message", ex.getMessage());
+        body.put("message", message);
         body.put("path", request.getRequestURI());
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(body);
     }
+
+
+
 
 }
