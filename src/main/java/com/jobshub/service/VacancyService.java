@@ -46,6 +46,10 @@ public class VacancyService {
 
        VacancyStatus vacancyStatus = null;
 
+       if (name != null && name.isBlank()) {
+           name = null;
+       }
+
         if (status != null && !status.isBlank()) {
             try {
                 vacancyStatus = VacancyStatus.valueOf(status.toUpperCase());

@@ -2,6 +2,7 @@ package com.jobshub.service;
 
 import com.jobshub.dto.company.CompanyFormDto;
 import com.jobshub.dto.company.CompanyResponseDto;
+import com.jobshub.dto.company.CompanySelectionDto;
 import com.jobshub.error.BadRequestException;
 import com.jobshub.error.NotFoundException;
 import com.jobshub.model.Company;
@@ -17,6 +18,12 @@ public class CompanyService {
 
     public CompanyService(CompanyRepo companyRepo) {
         this.companyRepo = companyRepo;
+    }
+
+    public List<CompanySelectionDto> getCompaniesForFilter() {
+        return companyRepo.findAll()
+                .stream()
+                .map(company -> new CompanySelectionDto(company.getId(), company.getName())).toList();
     }
 
     public List<CompanyResponseDto> getAllCompanies() {

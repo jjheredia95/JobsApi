@@ -1,6 +1,6 @@
 package com.jobshub.dto.company;
 
-public record CompanyFilterDto(
+public record CompanySelectionDto(
         Integer id,
         String name
 ) {

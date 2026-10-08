@@ -2,6 +2,7 @@ package com.jobshub.controller;
 
 import com.jobshub.dto.company.CompanyFormDto;
 import com.jobshub.dto.company.CompanyResponseDto;
+import com.jobshub.dto.company.CompanySelectionDto;
 import com.jobshub.service.CompanyService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,11 @@ public class CompanyController {
 
     public CompanyController(CompanyService companyService) {
         this.companyService = companyService;
+    }
+
+    @GetMapping("/filters")
+    public ResponseEntity<List<CompanySelectionDto>> getCompaniesForFilters() {
+        return ResponseEntity.ok(companyService.getCompaniesForFilter());
     }
 
     @GetMapping()
