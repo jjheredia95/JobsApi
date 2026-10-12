@@ -89,7 +89,7 @@ public class VacancyService {
 
 
 
-    //Create a vacancy
+    // Create a vacancy
     public VacancyFullDto createNewVacancy(VacancyCreationDto vacancyDto) {
         String vacancyName = vacancyDto.name().trim();
         LocalDate publishedDate = LocalDate.now();
@@ -260,7 +260,6 @@ public class VacancyService {
         newVacancy.setDetails(vacancyDto.details());//
         newVacancy.setCompany(company);//
         newVacancy.setLocations(locations);
-        newVacancy.setImage(vacancyDto.image());
 
         return newVacancy;
     }
