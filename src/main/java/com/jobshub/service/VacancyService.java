@@ -22,6 +22,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -31,6 +32,8 @@ public class VacancyService {
     private final CategoryRepo categoryRepo;
     private final CompanyRepo companyRepo;
     private final LocationRepo locationRepo;
+    private static final String ZONE_NAME = "America/New_York";
+    private static final ZoneId APP_ZONE = ZoneId.of(ZONE_NAME);
 
     public VacancyService(VacancyRepo vacancyRepo,
                           CategoryRepo categoryRepo,
@@ -40,6 +43,34 @@ public class VacancyService {
         this.categoryRepo = categoryRepo;
         this.companyRepo = companyRepo;
         this.locationRepo = locationRepo;
+    }
+
+    // FEATURED OPEN / PUBLISHED VACANCIES
+    public Page<VacancyCardDto> getFeaturedVacancies(Pageable pageable) {
+        Page<Vacancy> vacancies = vacancyRepo.findFeaturedOpenPublishedVacancies(pageable);
+        return vacancies.map(vacancy -> new VacancyCardDto(
+                vacancy.getId(),
+                vacancy.getCategory().getName(),
+                vacancy.getName(),
+                vacancy.getCompany().getName(),
+                vacancy.getLocations()
+                        .stream()
+                        .map(location -> new LocationDto(
+                                location.getId(),
+                                location.getCity(),
+                                location.getState())).toList(),
+                vacancy.getEmploymentType(),
+                vacancy.getSalary(),
+                vacancy.getDescription(),
+                vacancy.getStatus(),
+                vacancy.getPublishedDate(),
+                vacancy.getOpenDate(),
+                vacancy.getCloseDate()));
+    }
+
+
+    private LocalDate today() {
+        return LocalDate.now(APP_ZONE);
     }
 
     public Page<VacancyAdminListDto> getAllVacanciesAdminList(String name, Integer categoryId, Integer companyId, String status, Pageable pageable) {
@@ -71,16 +102,6 @@ public class VacancyService {
                 vacancy.getFeatured()));
     }
 
-    /*private VacancyAdminListDto toListDto(Vacancy vacancy) {
-        return new VacancyAdminListDto(
-                vacancy.getId(),
-                vacancy.getCategory().getName(),
-                vacancy.getName(),
-                vacancy.getPublishedDate(),
-                vacancy.getFeatured(),
-                vacancy.getStatus()
-        );
-    }*/
 
     public List<VacancyFullDto> getFullVacancyDetails() {
         List<Vacancy> vacancies = vacancyRepo.findAll();
@@ -89,104 +110,91 @@ public class VacancyService {
 
 
 
-    // Create a vacancy
-    public VacancyFullDto createNewVacancy(VacancyCreationDto vacancyDto) {
-        String vacancyName = vacancyDto.name().trim();
-        LocalDate publishedDate = LocalDate.now();
+    // =================   CREATION OF A NEW VACANCY ========================
+    public VacancyFullDto createNewVacancy(VacancyCreationDto vacancyDto, VacancyStatus targetStatus) {
 
-        validateDates(vacancyDto, publishedDate);
+        String vacancyName = vacancyDto.name();
+        LocalDate openingDate = (targetStatus == VacancyStatus.OPEN) ? today() : vacancyDto.openDate();
+        LocalDate closingDate = vacancyDto.closeDate();
 
+        validateDates(openingDate, closingDate);
         Category category = findCategoryOrThrow(vacancyDto.categoryId());
         Company company = findCompanyOrThrow(vacancyDto.companyId());
         List<Location> locations = findLocationsOrThrow(vacancyDto.locationIds());
-
         validateUniqueVacancyForCompany(vacancyName, company.getId());
 
-        Vacancy newVacancy = buildVacancy(vacancyDto, vacancyName, publishedDate, category, company, locations);
+        Vacancy newVacancy = buildVacancy(vacancyDto, vacancyName, category, company, locations, targetStatus, openingDate);
+
+        if (targetStatus != VacancyStatus.CREATED) {
+            publish(newVacancy, targetStatus);
+        }
 
         Vacancy savedVacancy = vacancyRepo.save(newVacancy);
 
         return toFullDto(savedVacancy);
     }
 
-    public VacancyFullDto updateVacancy(Integer id, VacancyUpdateDto vacancyDto) {
-        Vacancy vacancy = findVacancyOrThrow(id);
-        String vacancyName = vacancyDto.name().trim();
-
-        validateDates(vacancyDto, vacancy.getPublishedDate());
-
-        Category category = findCategoryOrThrow(vacancyDto.categoryId());
-        Company company = findCompanyOrThrow(vacancyDto.companyId());
-        List<Location> locations = findLocationsOrThrow(vacancyDto.locationIds());
-
-        validateUniqueVacancyForUpdate(vacancyName, company.getId(), vacancy.getId());
-
-        updateVacancyFields(vacancy, vacancyDto, vacancyName, category, company, locations);
-
-        Vacancy savedVacancy = vacancyRepo.save(vacancy);
-        return toFullDto(savedVacancy);
+    // APPLY PUBLISHING: CHECK THE REQUIREMENTS AND MARK THE PUBLISHED DATE
+    private void publish(Vacancy vacancy, VacancyStatus targetStatus) {
+        validatePublishable(vacancy, targetStatus);
+        vacancy.setPublishedDate(today());
     }
 
+    // VALIDATE THAT A VACANCY HAS EVERYTHING REQUIRED TO BE PUBLISHED
+    private void validatePublishable(Vacancy vacancy, VacancyStatus targetStatus) {
 
-
-    private VacancyFullDto toFullDto(Vacancy vacancy) {
-        return new VacancyFullDto(
-                vacancy.getId(),
-                vacancy.getName(),
-                vacancy.getDescription(),
-                vacancy.getSalary(),
-                vacancy.getPublishedDate(),
-                vacancy.getOpenDate(),
-                vacancy.getCloseDate(),
-                vacancy.getFeatured(),
-                vacancy.getStatus(),
-                vacancy.getCategory(),
-                vacancy.getDetails(),
-                vacancy.getImage(),
-                vacancy.getWorkMode(),
-                vacancy.getEmploymentType(),
-                vacancy.getCompany(),
-                vacancy.getLocations()
-        );
-    }
-
-    // overload method to create and update Dto
-    private void validateDates(VacancyCreationDto vacancyDto, LocalDate publishedDate) {
-        validateCorrectDates(vacancyDto.openDate(), vacancyDto.closeDate(), publishedDate);
-    }
-
-    private void validateDates(VacancyUpdateDto vacancyDto, LocalDate publishedDate) {
-        validateCorrectDates(vacancyDto.openDate(), vacancyDto.closeDate(), publishedDate);
-    }
-
-    // Reusing logic
-    private void validateCorrectDates(LocalDate openDate, LocalDate closeDate, LocalDate publishedDate) {
-        if (openDate != null && openDate.isBefore(publishedDate)) {
-            throw new BadRequestException("Open date cannot be before published date");
+        if (vacancy.getLocations() == null || vacancy.getLocations().isEmpty()) {
+            throw new BadRequestException("At least one location is required to publish a vacancy");
+        }
+        if (vacancy.getWorkMode() == null) {
+            throw new BadRequestException("Work mode is required to publish a vacancy");
+        }
+        if (vacancy.getEmploymentType() == null) {
+            throw new BadRequestException("Employment type is required to publish a vacancy");
         }
 
-        if (closeDate != null && openDate != null && closeDate.isBefore(openDate)) {
-            throw new BadRequestException("Close date cannot be before open date");
+        if (targetStatus == VacancyStatus.PUBLISHED) {
+            if (vacancy.getOpenDate() == null) {
+                throw new BadRequestException("Open date is required to publish a vacancy");
+            }
+            if (!vacancy.getOpenDate().isAfter(today())) {
+                throw new BadRequestException(
+                        "Open date must be after today. To open it today, use 'Publish and open now'");
+            }
+        }
+
+        if (vacancy.getCloseDate() != null && vacancy.getCloseDate().isBefore(today())) {
+            throw new BadRequestException("Close date cannot be in the past");
         }
     }
 
+    // VALIDATE DATE - CLOSE DATE CANNOT BE BEFORE OPENING DATE
+    private void validateDates(LocalDate openDate, LocalDate closeDate) {
+        if (closeDate != null && openDate != null) {
+            if (closeDate.isBefore(openDate)) {
+                throw new BadRequestException("Close date cannot be before open date");
+            }
+        }
+    }
 
+    // VALIDATE CATEGORY
     private Category findCategoryOrThrow(Integer categoryId) {
         return categoryRepo.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException("Category not found with id: " + categoryId));
     }
 
+    // VALIDATE COMPANY
     private Company findCompanyOrThrow(Integer companyId) {
         return companyRepo.findById(companyId)
                 .orElseThrow(() -> new NotFoundException("Company not found with id: " + companyId));
     }
 
-    private Vacancy findVacancyOrThrow(Integer id) {
-        return vacancyRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("Vacancy not found with id: " + id));
-    }
-
+    // VALIDATE LOCATIONS
     private List<Location> findLocationsOrThrow(List<Integer> locationIds) {
+        if (locationIds == null || locationIds.isEmpty()) {
+            return List.of();
+        }
+
         List<Integer> uniqueLocationIds = locationIds.stream().distinct().toList();
         List<Location> locations = locationRepo.findAllById(uniqueLocationIds);
 
@@ -197,71 +205,62 @@ public class VacancyService {
         return locations;
     }
 
+    // VALIDATE DUPLICATED VACANCY
     private void validateUniqueVacancyForCompany(String vacancyName, Integer companyId) {
         if (vacancyRepo.existsByNameIgnoreCaseAndCompany_Id(vacancyName, companyId)) {
             throw new BadRequestException("This company already has a vacancy with that name");
         }
     }
 
-    private void validateUniqueVacancyForUpdate(String vacancyName, Integer companyId, Integer vacancyId) {
-        if (vacancyRepo.existsByNameIgnoreCaseAndCompany_IdAndIdNot(vacancyName, companyId, vacancyId)) {
-            throw new BadRequestException("This company already has a vacancy with that name");
-        }
-    }
-
-    private String resolveImageName(VacancyUpdateDto vacancyDto, String currentImage) {
-        return vacancyDto.image() != null ? vacancyDto.image() : currentImage;
-    }
-
-    private void updateVacancyFields(Vacancy vacancy, VacancyUpdateDto vacancyDto, String vacancyName,
-                                     Category category, Company company, List<Location> locations) {
-        vacancy.setName(vacancyName);
-        vacancy.setDescription(vacancyDto.description());
-        vacancy.setSalary(vacancyDto.salary());
-        vacancy.setOpenDate(vacancyDto.openDate());
-        vacancy.setCloseDate(vacancyDto.closeDate());
-        vacancy.setFeatured(vacancyDto.featured());
-        vacancy.setStatus(vacancyDto.status());
-        vacancy.setCategory(category);
-        vacancy.setDetails(vacancyDto.details());
-        vacancy.setImage(resolveImageName(vacancyDto, vacancy.getImage()));
-        vacancy.setWorkMode(vacancyDto.workMode());
-        vacancy.setEmploymentType(vacancyDto.employmentType());
-        vacancy.setCompany(company);
-        vacancy.setLocations(locations);
-    }
-
-
+    // BUILD NEW VACANCY
     private Vacancy buildVacancy(
             VacancyCreationDto vacancyDto,
             String vacancyName,
-            LocalDate publishedDate,
             Category category,
             Company company,
-            List<Location> locations) {
+            List<Location> locations,
+            VacancyStatus targetStatus,
+            LocalDate openingDate) {
 
         Vacancy newVacancy = new Vacancy();
 
-        newVacancy.setName(vacancyName);//
-        newVacancy.setDescription(vacancyDto.description());//
-        newVacancy.setSalary(vacancyDto.salary());//
-        newVacancy.setPublishedDate(publishedDate);
-
-        // Optional Dates - can be NULL
-        newVacancy.setOpenDate(vacancyDto.openDate());//
-        newVacancy.setCloseDate(vacancyDto.closeDate());//
-
-
-        newVacancy.setFeatured(false); // A new vacancy won't be featured by default.
-        newVacancy.setStatus(VacancyStatus.PUBLISHED); // A new vacancy will be display published by default.
-
-
+        newVacancy.setName(vacancyName);
+        newVacancy.setDescription(vacancyDto.description());
+        newVacancy.setSalary(vacancyDto.salary());
+        newVacancy.setOpenDate(openingDate);
+        newVacancy.setCloseDate(vacancyDto.closeDate());
+        newVacancy.setFeatured(false);
+        newVacancy.setStatus(targetStatus);
         newVacancy.setCategory(category);
-        newVacancy.setDetails(vacancyDto.details());//
-        newVacancy.setCompany(company);//
+        newVacancy.setDetails(vacancyDto.details());
+        newVacancy.setWorkMode(vacancyDto.workMode());
+        newVacancy.setEmploymentType(vacancyDto.employmentType());
+        newVacancy.setCompany(company);
         newVacancy.setLocations(locations);
-
         return newVacancy;
+    }
+
+    // ================= END OF VACANCY CREATION =====================
+
+    // SHOW ALL DATA OF NEW CREATED VACANCY FROM BD
+    private VacancyFullDto toFullDto(Vacancy vacancy) {
+        return new VacancyFullDto(
+                vacancy.getId(),
+                vacancy.getName(),
+                vacancy.getDescription(),
+                vacancy.getSalary(),
+                vacancy.getOpenDate(),
+                vacancy.getCloseDate(),
+                vacancy.getFeatured(),
+                vacancy.getStatus(),
+                vacancy.getCategory(),
+                vacancy.getDetails(),
+                vacancy.getPublishedDate(),
+                vacancy.getWorkMode(),
+                vacancy.getEmploymentType(),
+                vacancy.getCompany(),
+                vacancy.getCreatedAt(),
+                vacancy.getLocations());
     }
 
     public Vacancy getVacancyById(Integer id) {
@@ -273,53 +272,13 @@ public class VacancyService {
         vacancyRepo.delete(vacancy);
     }
 
-    // Applying filters & Pagination
-    public Page<VacancyHomeDto> getHomeVacancies(
-            Boolean all,
-            String description,
-            Integer catId,
-            Pageable pageable) {
-
-        Page<Vacancy> vacancies;
-
-        // All = OPEN
-        if (Boolean.TRUE.equals(all)) {
-            vacancies = vacancyRepo.findByStatusOrderByNameAsc(
-                    VacancyStatus.OPEN,
-                    pageable
-            );
-        }
-
-        // Default = Featured + OPEN
-        else if (catId == null && (description == null || description.isBlank())) {
-            vacancies = vacancyRepo.findByFeaturedAndStatusOrderByIdAsc(
-                    true,
-                    VacancyStatus.OPEN,
-                    pageable
-            );
-        }
-
-        else {
-            vacancies = vacancyRepo.searchVacancies(
-                    description,
-                    catId,
-                    VacancyStatus.OPEN,
-                    pageable
-            );
-        }
-
-        return vacancies.map(vacancy -> new VacancyHomeDto(
-                vacancy.getId(),
-                vacancy.getCategory().getName(),
-                vacancy.getName(),
-                vacancy.getPublishedDate(),
-                vacancy.getStatus(),
-                vacancy.getDescription()
-        ));
-    }
-
     public VacancyDetailsDto showVacancyDetails(Integer id) {
         Vacancy vacancy = getVacancyById(id);
+
+        if (vacancy.getStatus() == VacancyStatus.CREATED) {
+            throw new NotFoundException("Vacancy not found");
+        }
+
         return new VacancyDetailsDto(
                 vacancy.getCategory().getName(),
                 vacancy.getName(),
@@ -346,11 +305,15 @@ public class VacancyService {
                         location.getState())).toList());
     }
 
-    // method to automatically change status to closed
+
+
     @Transactional
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0 0 * * *", zone = ZONE_NAME)
     public void closeExpiredVacancies() {
-        vacancyRepo.closeExpiredVacancies(LocalDate.now(), VacancyStatus.CLOSED);
+        LocalDate today = today();
+        vacancyRepo.closeExpiredVacancies(VacancyStatus.OPEN, VacancyStatus.CLOSED, today);
     }
+
+
 
 }

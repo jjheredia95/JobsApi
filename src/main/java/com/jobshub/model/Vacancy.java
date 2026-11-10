@@ -4,7 +4,9 @@ import com.jobshub.model.enums.EmploymentType;
 import com.jobshub.model.enums.VacancyStatus;
 import com.jobshub.model.enums.WorkMode;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -43,8 +45,6 @@ public class Vacancy {
     @Column(columnDefinition = "TEXT")
     private String details;
 
-    private String image;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "work_mode")
     private WorkMode workMode;
@@ -64,6 +64,10 @@ public class Vacancy {
             inverseJoinColumns = @JoinColumn(name = "location_id")
     )
     private List<Location> locations;
+
+    @Column(name = "created_at", updatable = false)
+    @CreationTimestamp
+    private Instant createdAt;
 
     public Integer getId() {
         return id;
@@ -153,14 +157,6 @@ public class Vacancy {
         this.details = details;
     }
 
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
     public WorkMode getWorkMode() {
         return workMode;
     }
@@ -191,5 +187,9 @@ public class Vacancy {
 
     public void setLocations(List<Location> locations) {
         this.locations = locations;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 }

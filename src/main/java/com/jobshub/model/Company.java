@@ -17,8 +17,6 @@ public class Company {
 
     private String website;
 
-    private String logo;
-
     private String headquarters;
 
     public Integer getId() {
@@ -51,14 +49,6 @@ public class Company {
 
     public void setWebsite(String website) {
         this.website = website;
-    }
-
-    public String getLogo() {
-        return logo;
-    }
-
-    public void setLogo(String logo) {
-        this.logo = logo;
     }
 
     public String getHeadquarters() {

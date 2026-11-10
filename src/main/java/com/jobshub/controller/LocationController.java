@@ -28,10 +28,10 @@ public class LocationController {
         return ResponseEntity.ok(locationService.getAllLocations());
     }
 
-    @PostMapping
+    /* @PostMapping
     public ResponseEntity<LocationDto> createLocation(@Valid @RequestBody LocationCreationDto location) {
         return ResponseEntity.status(201).body(locationService.createLocation(location));
-    }
+    } */
 
 
 

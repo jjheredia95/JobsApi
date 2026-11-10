@@ -10,7 +10,7 @@ public record VacancyAdminListDto(
         String categoryName,
         String name,
         LocalDate publishedDate,
-        LocalDate closingDate,
+        LocalDate closeDate,
         VacancyStatus status,
         Boolean featured
 

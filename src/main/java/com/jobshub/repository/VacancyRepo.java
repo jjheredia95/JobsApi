@@ -17,13 +17,27 @@ import java.time.LocalDate;
 
 public interface VacancyRepo extends JpaRepository<Vacancy, Integer>, JpaSpecificationExecutor<Vacancy> {
 
+    long countByStatus(VacancyStatus status);
     boolean existsByNameIgnoreCaseAndCompany_Id(String name, Integer companyId);
 
-    boolean existsByNameIgnoreCaseAndCompany_IdAndIdNot(String name, Integer companyId, Integer id);
+    // FEATURED VACANCIES (ALWAYS OPEN OR PUBLISHED, OPEN COMES FIRST)
+    @Query("""
+    SELECT v FROM Vacancy v
+    WHERE v.featured = true AND v.status IN (com.jobshub.model.enums.VacancyStatus.OPEN, com.jobshub.model.enums.VacancyStatus.PUBLISHED)
+    ORDER BY
+      CASE WHEN v.status = com.jobshub.model.enums.VacancyStatus.OPEN THEN 0 ELSE 1 END,
+      v.id ASC
+    """)
+    Page<Vacancy> findFeaturedOpenPublishedVacancies(Pageable pageable);
 
-    Page<Vacancy> findByFeaturedAndStatusOrderByIdAsc(boolean featured, VacancyStatus status, Pageable pageable);
 
-    Page<Vacancy> findByStatusOrderByNameAsc(VacancyStatus status, Pageable pageable);
+
+
+
+
+
+
+
 
     // TODO: support multi-word search (currently matches exact phrase only — "software developer" won't match "developer" alone)
     @Query("""
@@ -67,14 +81,19 @@ public interface VacancyRepo extends JpaRepository<Vacancy, Integer>, JpaSpecifi
             @Param("status") VacancyStatus status,
             Pageable pageable);
 
-
-
-
-    @Modifying
+    // Automatically close open vacancies which close date has arrived
+    @Modifying(clearAutomatically = true)
     @Query("""
-        update Vacancy v set v.status = :closedStatus where v.closeDate is not null and v.closeDate <= :today and v.status <> :closedStatus
-        """)
-    void closeExpiredVacancies(LocalDate today, VacancyStatus closedStatus);
+       UPDATE Vacancy v
+       SET v.status = :closed
+       WHERE v.status = :open
+         AND v.closeDate < :today
+       """)
+    void closeExpiredVacancies(@Param("open") VacancyStatus open,
+                              @Param("closed") VacancyStatus closed,
+                              @Param("today") LocalDate today);
+
+
 
 
 

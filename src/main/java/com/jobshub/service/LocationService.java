@@ -20,32 +20,19 @@ public class LocationService {
 
     public List<LocationDto> getAllLocations() {
         List<Location> locations = locationRepo.findAll();
-        return locations.stream().map(this::toLocationsDto).toList();
-
+        return locations.stream().map(
+                location -> new LocationDto(
+                        location.getId(), location.getCity(), location.getState())).toList();
     }
-
-    public LocationDto createLocation(LocationCreationDto locationDto) {
-        String city = locationDto.city().trim();
-        String state = locationDto.state().trim();
-
-        if (locationRepo.existsByCityIgnoreCaseAndStateIgnoreCase(city, state)) {
-            throw new BadRequestException("Location already exists: " + city + ", " + state);
-        }
-
-        Location location = new Location();
-        location.setCity(city);
-        location.setState(state);
-
-        return toLocationsDto(locationRepo.save(location));
-    }
-
-    private LocationDto toLocationsDto(Location location) {
-        return new LocationDto(location.getId(), location.getCity(), location.getState());
-    }
-
-
-
-
-
-
 }
+
+
+
+
+
+
+
+
+
+
+

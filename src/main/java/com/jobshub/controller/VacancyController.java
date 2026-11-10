@@ -5,8 +5,6 @@ import com.jobshub.model.Vacancy;
 import com.jobshub.model.enums.VacancyStatus;
 import com.jobshub.service.VacancyService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,8 +25,7 @@ public class VacancyController {
     public VacancyController(VacancyService vacancyService) {
         this.vacancyService = vacancyService;
     }
-
-    @GetMapping("/admin")
+    /*@GetMapping("/admin")
     public ResponseEntity<Page<VacancyAdminListDto>> getAdminVacancies(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Integer categoryId,
@@ -40,22 +37,43 @@ public class VacancyController {
         Pageable pageable = PageRequest.of(page, size);
         Page<VacancyAdminListDto> result = vacancyService.getAllVacanciesAdminList(name, categoryId, companyId, status, pageable);
         return ResponseEntity.ok(result);
-    }
+    }*/
 
-    @GetMapping("/full") // (NO USAGE): TEST EVERYTHING FLOWS
+    @GetMapping() // (NO USAGE): TEST EVERYTHING FLOWS
     public ResponseEntity<List<VacancyFullDto>> getFullVacancies() {
         return ResponseEntity.ok(vacancyService.getFullVacancyDetails());
     }
 
-    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<VacancyFullDto> createNewVacancy(@Valid @RequestBody VacancyCreationDto vacancy) {
-        return ResponseEntity.status(201).body(vacancyService.createNewVacancy(vacancy));
+    // FEATURED VACANCIES
+    @GetMapping("/featured")
+    public ResponseEntity<Page<VacancyCardDto>> featuredJobs(@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(vacancyService.getFeaturedVacancies(pageable));
     }
 
-    @PutMapping(value = "/update/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<VacancyFullDto> createNewVacancy(@Valid @RequestBody VacancyCreationDto vacancyDto) {
+        return ResponseEntity.status(201).body(vacancyService.createNewVacancy(vacancyDto, VacancyStatus.CREATED));
+    }
+
+    @PostMapping(value = "/create-and-publish", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<VacancyFullDto> createAndPublish(@Valid @RequestBody VacancyCreationDto vacancy) {
+        return ResponseEntity.status(201).body(vacancyService.createNewVacancy(vacancy, VacancyStatus.PUBLISHED));
+    }
+
+    @PostMapping(value = "/create-and-open", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<VacancyFullDto> createPublishAndOpen(@Valid @RequestBody VacancyCreationDto vacancy) {
+        return ResponseEntity.status(201).body(vacancyService.createNewVacancy(vacancy, VacancyStatus.OPEN));
+    }
+
+
+
+
+
+   /* @PutMapping(value = "/update/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VacancyFullDto> updateVacancy(@PathVariable Integer id, @Valid @RequestBody VacancyUpdateDto vacancy) {
         return ResponseEntity.ok(vacancyService.updateVacancy(id, vacancy));
-    }
+    }*/
 
     @GetMapping("/{id}")
     public ResponseEntity<Vacancy> getVacancyById(@PathVariable Integer id) {

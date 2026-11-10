@@ -1,6 +1,5 @@
 package com.jobshub.dto.vacancy;
 import com.jobshub.model.enums.EmploymentType;
-import com.jobshub.model.enums.VacancyStatus;
 import com.jobshub.model.enums.WorkMode;
 import jakarta.validation.constraints.*;
 
@@ -18,8 +17,12 @@ public record VacancyCreationDto(
         String description,
 
         @NotNull(message = "Category is required")
-        @Positive(message = "Category id must be positive")
+        @Positive(message = "Category id must be greater than 0")
         Integer categoryId,
+
+        @NotNull(message = "Company is required")
+        @Positive(message = "Company id must be greater than 0")
+        Integer companyId,
 
         LocalDate openDate,
         LocalDate closeDate,
@@ -36,18 +39,19 @@ public record VacancyCreationDto(
         @DecimalMax(value = "1000000", inclusive = true, message = "Salary must not exceed 1000000")
         Double salary,
 
-
         @Size(min = 10, max = 250, message = "Details must be between 10 and 250 characters")
         String details,//;-)
 
-        @NotNull(message = "Company is required")
-        @Positive(message = "Company id must be greater than 0")
-        Integer companyId, //;-)
+        List<@NotNull(message = "Location id cannot be null")
+             @Positive(message = "Location id must be greater than 0") Integer> locationIds,
 
-        @NotEmpty(message = "At least one location is required")
-        List<@NotNull(message = "Location id cannot be blank")
-             @Positive(message = "Location id must be greater than 0")
-                Integer> locationIds//;-)
+        EmploymentType employmentType,
+        WorkMode workMode
 
 ) {
+        public VacancyCreationDto {
+                name = (name == null) ? null : name.trim();
+                description = (description == null) ? null : description.trim();
+                details = (details == null || details.isBlank()) ? null : details.trim();
+        }
 }

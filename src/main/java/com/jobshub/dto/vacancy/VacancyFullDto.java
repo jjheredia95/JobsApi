@@ -7,6 +7,7 @@ import com.jobshub.model.enums.EmploymentType;
 import com.jobshub.model.enums.VacancyStatus;
 import com.jobshub.model.enums.WorkMode;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -15,18 +16,19 @@ public record VacancyFullDto(
         String name,
         String description,
         Double salary,
-        LocalDate publishedDate,
         LocalDate openDate,
         LocalDate closeDate,
         Boolean featured,
         VacancyStatus status,
         Category category,
         String details,
-        String image,
+        LocalDate publishedDate,
         WorkMode workMode,
         EmploymentType employmentType,
         Company company,
+        Instant createdAt,
         List<Location> locations
+
 
 )
 {
