@@ -1,5 +1,6 @@
 package com.jobshub.dto.vacancy;
 import com.jobshub.model.enums.EmploymentType;
+import com.jobshub.model.enums.VacancyStatus;
 import com.jobshub.model.enums.WorkMode;
 import jakarta.validation.constraints.*;
 
@@ -40,13 +41,10 @@ public record VacancyCreationDto(
         Double salary,
 
         @Size(min = 10, max = 250, message = "Details must be between 10 and 250 characters")
-        String details,//;-)
+        String details,
 
         List<@NotNull(message = "Location id cannot be null")
-             @Positive(message = "Location id must be greater than 0") Integer> locationIds,
-
-        EmploymentType employmentType,
-        WorkMode workMode
+             @Positive(message = "Location id must be greater than 0") Integer> locationIds
 
 ) {
         public VacancyCreationDto {
