@@ -1,6 +1,6 @@
 package com.jobshub.dto.category;
 
-public record CategoryResponse(
+public record CategoryDto(
         Integer id,
         String name,
         String description

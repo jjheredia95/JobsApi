@@ -1,7 +1,7 @@
 package com.jobshub.controller;
 
+import com.jobshub.dto.category.CategoryDto;
 import com.jobshub.dto.category.CategoryFormResponseDto;
-import com.jobshub.dto.category.CategoryResponse;
 import com.jobshub.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -20,17 +20,17 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    @PostMapping("/create")
+    /*@PostMapping("/create")
     public ResponseEntity<List<CategoryResponse>> createCategory(@Valid @RequestBody CategoryFormResponseDto request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.createCategory(request));
-    }
+    }*/
 
     @GetMapping()
-    public ResponseEntity<List<CategoryResponse>> getCategories() {
+    public ResponseEntity<List<CategoryDto>> getCategories() {
         return ResponseEntity.ok(categoryService.getAllCategories());
     }
 
-    @PutMapping("/update/{id}")
+    /*@PutMapping("/update/{id}")
     public ResponseEntity<List<CategoryResponse>> updateCategory(@PathVariable Integer id,
                                                                  @Valid @RequestBody CategoryFormResponseDto request
     ) {
@@ -49,7 +49,7 @@ public class CategoryController {
     }
 
 
-
+*/
 
 
 

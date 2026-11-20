@@ -1,7 +1,7 @@
 package com.jobshub.service;
 
+import com.jobshub.dto.category.CategoryDto;
 import com.jobshub.dto.category.CategoryFormResponseDto;
-import com.jobshub.dto.category.CategoryResponse;
 import com.jobshub.error.BadRequestException;
 import com.jobshub.error.NotFoundException;
 import com.jobshub.model.Category;
@@ -19,16 +19,16 @@ public class CategoryService {
         this.categoryRepo = categoryRepo;
     }
 
-    public List<CategoryResponse> getAllCategories() {
+    public List<CategoryDto> getAllCategories() {
         List<Category> categories = categoryRepo.findAll();
         return categories.stream()
-                .map(c -> new CategoryResponse(
+                .map(c -> new CategoryDto(
                         c.getId(),
                         c.getName(),
                         c.getDescription())).toList();
     }
 
-    public List<CategoryResponse> createCategory(CategoryFormResponseDto category) {
+    /*public List<CategoryResponse> createCategory(CategoryFormResponseDto category) {
         validateNameLength(category.name());
         validateDescriptionLength(category.description());
 
@@ -91,7 +91,7 @@ public class CategoryService {
             throw new BadRequestException("Name must be at most 40 characters");
         }
     }
-
+*/
 
 
 }

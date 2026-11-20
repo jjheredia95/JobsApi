@@ -1,7 +1,10 @@
 package com.jobshub.repository;
 
+import com.jobshub.dto.vacancy.VacancyCardDto;
 import com.jobshub.model.Vacancy;
+import com.jobshub.model.enums.EmploymentType;
 import com.jobshub.model.enums.VacancyStatus;
+import com.jobshub.model.enums.WorkMode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +16,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 
 
 public interface VacancyRepo extends JpaRepository<Vacancy, Integer>, JpaSpecificationExecutor<Vacancy> {
@@ -42,22 +46,26 @@ public interface VacancyRepo extends JpaRepository<Vacancy, Integer>, JpaSpecifi
     // TODO: support multi-word search (currently matches exact phrase only — "software developer" won't match "developer" alone)
     @Query("""
     SELECT v FROM Vacancy v
-    WHERE v.status = :status
-    AND (
-        :description is null
-         or :description = ''
-         or lower(v.name) like lower(concat('%', :description, '%') )
-         or lower(v.description) like lower(concat('%', :description, '%') ) )
-    AND (
-        :categoryId is null
-         or v.category.id = :categoryId)
+    WHERE (
+         cast(:keyword as String) is null
+         or lower(v.name) like concat('%', cast(:keyword as String), '%')
+         or lower(v.description) like concat('%', cast(:keyword as String), '%'))
+    AND (:categoryId is null or v.category.id = :categoryId)
+    AND (:state is null or exists (select l from v.locations l where l.state = :state))
+    AND (:employment_type is null or v.employmentType = :employment_type)
+    AND (:workMode is null or v.workMode = :workMode)
+    AND (v.status in :statuses)
+    ORDER BY v.name, v.id
     """)
-    Page<Vacancy> searchVacancies(
-            @Param("description") String des,
-            @Param("categoryId") Integer catId,
-            @Param("status") VacancyStatus status, Pageable pageable);
+    Page<Vacancy> searchVacanciesByFiltering(@Param("keyword") String keyword,
+                                                    @Param("categoryId") Integer category,
+                                                    @Param("state") String state,
+                                                    @Param("employment_type") EmploymentType type,
+                                                    @Param("workMode") WorkMode mode,
+                                                    @Param ("statuses") List<VacancyStatus> statuses,
+                                                    Pageable pageable);
 
-
+    // ADMIN SEARCH
     @Query("""
     select v from Vacancy v
          where

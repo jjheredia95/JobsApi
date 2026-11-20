@@ -5,6 +5,8 @@ import com.jobshub.model.Vacancy;
 import com.jobshub.model.enums.VacancyStatus;
 import com.jobshub.service.VacancyService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +19,7 @@ import java.util.List;
 
 @Validated
 @RestController
-@RequestMapping("api/vacancies")
+@RequestMapping("api/jobs")
 public class VacancyController {
 
     private final VacancyService vacancyService;
@@ -44,9 +46,25 @@ public class VacancyController {
         return ResponseEntity.ok(vacancyService.getFullVacancyDetails());
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Page<VacancyCardDto>> search(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) String state,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String mode,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(vacancyService.filterJobsBy(keyword, categoryId, state, type, mode, pageable));
+    }
+
     // FEATURED VACANCIES
     @GetMapping("/featured")
-    public ResponseEntity<Page<VacancyCardDto>> featuredJobs(@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer size) {
+    public ResponseEntity<Page<VacancyCardDto>> featuredJobs(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(vacancyService.getFeaturedVacancies(pageable));
     }

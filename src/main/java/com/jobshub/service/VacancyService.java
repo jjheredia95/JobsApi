@@ -9,7 +9,9 @@ import com.jobshub.model.Category;
 import com.jobshub.model.Company;
 import com.jobshub.model.Location;
 import com.jobshub.model.Vacancy;
+import com.jobshub.model.enums.EmploymentType;
 import com.jobshub.model.enums.VacancyStatus;
+import com.jobshub.model.enums.WorkMode;
 import com.jobshub.repository.CategoryRepo;
 import com.jobshub.repository.CompanyRepo;
 import com.jobshub.repository.LocationRepo;
@@ -72,6 +74,56 @@ public class VacancyService {
     private LocalDate today() {
         return LocalDate.now(APP_ZONE);
     }
+
+    // GENERAL FILTER
+    public Page<VacancyCardDto> filterJobsBy(String title, Integer idCategory, String state, String empType, String mode, Pageable pageable) {
+        EmploymentType jobType = null;
+        WorkMode jobMode = null;
+
+        String jobKeyword = (title != null && !title.isBlank()) ? title.toLowerCase().trim() : null;
+        String usState = (state != null && !state.isBlank()) ? state.toUpperCase().trim() : null;
+
+        if (empType != null && !empType.isBlank()) {
+            try {
+                jobType = EmploymentType.valueOf(empType.trim().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Invalid vacancy employment type: " + empType);
+
+            }
+        }
+
+        if (mode != null && !mode.isBlank()) {
+            try {
+                jobMode = WorkMode.valueOf(mode.trim().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Invalid work mode: " + mode);
+            }
+        }
+
+        Page<Vacancy> vacancies = vacancyRepo.searchVacanciesByFiltering(jobKeyword, idCategory, usState, jobType, jobMode, List.of(VacancyStatus.OPEN, VacancyStatus.PUBLISHED), pageable);
+
+        return vacancies.map(vacancy -> new VacancyCardDto(
+                vacancy.getId(),
+                vacancy.getCategory().getName(),
+                vacancy.getName(),
+                vacancy.getCompany().getName(),
+                vacancy.getLocations()
+                        .stream()
+                        .map(location -> new LocationDto(
+                                location.getId(),
+                                location.getCity(),
+                                location.getState())).toList(),
+                vacancy.getEmploymentType(),
+                vacancy.getSalary(),
+                vacancy.getDescription(),
+                vacancy.getStatus(),
+                vacancy.getPublishedDate(),
+                vacancy.getOpenDate(),
+                vacancy.getCloseDate()));
+    }
+
+
+
 
     public Page<VacancyAdminListDto> getAllVacanciesAdminList(String name, Integer categoryId, Integer companyId, String status, Pageable pageable) {
 
