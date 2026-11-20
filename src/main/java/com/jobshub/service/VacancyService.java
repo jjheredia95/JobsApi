@@ -47,10 +47,8 @@ public class VacancyService {
         this.locationRepo = locationRepo;
     }
 
-    // FEATURED OPEN / PUBLISHED VACANCIES
-    public Page<VacancyCardDto> getFeaturedVacancies(Pageable pageable) {
-        Page<Vacancy> vacancies = vacancyRepo.findFeaturedOpenPublishedVacancies(pageable);
-        return vacancies.map(vacancy -> new VacancyCardDto(
+    private VacancyCardDto toCardDto(Vacancy vacancy) {
+        return new VacancyCardDto(
                 vacancy.getId(),
                 vacancy.getCategory().getName(),
                 vacancy.getName(),
@@ -60,16 +58,29 @@ public class VacancyService {
                         .map(location -> new LocationDto(
                                 location.getId(),
                                 location.getCity(),
-                                location.getState())).toList(),
+                                location.getState()))
+                        .toList(),
                 vacancy.getEmploymentType(),
                 vacancy.getSalary(),
                 vacancy.getDescription(),
                 vacancy.getStatus(),
                 vacancy.getPublishedDate(),
                 vacancy.getOpenDate(),
-                vacancy.getCloseDate()));
+                vacancy.getCloseDate());
     }
 
+    // FEATURED OPEN / PUBLISHED VACANCIES
+    public Page<VacancyCardDto> getFeaturedVacancies(Pageable pageable) {
+        Page<Vacancy> vacancies = vacancyRepo.findFeaturedOpenPublishedVacancies(pageable);
+        return vacancies.map(this::toCardDto);
+
+    }
+
+    // ALL VACANCIES PUBLISHED AND OPEN ORDER BY NAME (A-Z) REGARDLESS FEATURED
+    public Page<VacancyCardDto> getAllOpenPublished(Pageable pageable) {
+        Page<Vacancy> vacancies = vacancyRepo.findByStatusInOrderByNameAscIdAsc(List.of(VacancyStatus.OPEN, VacancyStatus.PUBLISHED), pageable);
+        return vacancies.map(this::toCardDto);
+    }
 
     private LocalDate today() {
         return LocalDate.now(APP_ZONE);
@@ -100,26 +111,19 @@ public class VacancyService {
             }
         }
 
+        boolean hasNoFilters = jobKeyword == null
+                && idCategory == null
+                && usState == null
+                && jobType == null
+                && jobMode == null;
+
+        if (hasNoFilters) {
+            return Page.empty(pageable);
+        }
+
         Page<Vacancy> vacancies = vacancyRepo.searchVacanciesByFiltering(jobKeyword, idCategory, usState, jobType, jobMode, List.of(VacancyStatus.OPEN, VacancyStatus.PUBLISHED), pageable);
 
-        return vacancies.map(vacancy -> new VacancyCardDto(
-                vacancy.getId(),
-                vacancy.getCategory().getName(),
-                vacancy.getName(),
-                vacancy.getCompany().getName(),
-                vacancy.getLocations()
-                        .stream()
-                        .map(location -> new LocationDto(
-                                location.getId(),
-                                location.getCity(),
-                                location.getState())).toList(),
-                vacancy.getEmploymentType(),
-                vacancy.getSalary(),
-                vacancy.getDescription(),
-                vacancy.getStatus(),
-                vacancy.getPublishedDate(),
-                vacancy.getOpenDate(),
-                vacancy.getCloseDate()));
+        return vacancies.map(this::toCardDto);
     }
 
 

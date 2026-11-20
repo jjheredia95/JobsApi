@@ -60,11 +60,19 @@ public class VacancyController {
         return ResponseEntity.ok(vacancyService.filterJobsBy(keyword, categoryId, state, type, mode, pageable));
     }
 
+    // ALL VACANCIES PUBLISHED AND OPEN ORDER BY NAME (A-Z) REGARDLESS FEATURED
+    @GetMapping("/all")
+    public ResponseEntity<Page<VacancyCardDto>> getAllVacancies(@RequestParam(defaultValue = "0") @Min(0) int page,
+                                                                @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(vacancyService.getAllOpenPublished(pageable));
+    }
+
     // FEATURED VACANCIES
     @GetMapping("/featured")
     public ResponseEntity<Page<VacancyCardDto>> featuredJobs(
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(vacancyService.getFeaturedVacancies(pageable));
     }

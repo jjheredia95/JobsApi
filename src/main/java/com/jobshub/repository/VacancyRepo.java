@@ -1,6 +1,5 @@
 package com.jobshub.repository;
 
-import com.jobshub.dto.vacancy.VacancyCardDto;
 import com.jobshub.model.Vacancy;
 import com.jobshub.model.enums.EmploymentType;
 import com.jobshub.model.enums.VacancyStatus;
@@ -33,6 +32,23 @@ public interface VacancyRepo extends JpaRepository<Vacancy, Integer>, JpaSpecifi
       v.id ASC
     """)
     Page<Vacancy> findFeaturedOpenPublishedVacancies(Pageable pageable);
+
+    // ALL VACANCIES PUBLISHED AND OPEN ORDER BY NAME (A-Z) REGARDLESS FEATURED
+    Page<Vacancy> findByStatusInOrderByNameAscIdAsc(List<VacancyStatus> statuses, Pageable pageable);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
